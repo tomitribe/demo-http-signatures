@@ -1,0 +1,275 @@
+:encoding: UTF-8
+:linkattrs:
+:sectlink:
+:sectanchors:
+:sectid:
+:imagesdir: media
+
+= Metrics
+
+== Introduction
+
+=== Time
+10 minutes
+
+=== Learning objectives
+* Run and secure your first Microservice with HTTP Signatures.
+* Have basic understanding on how HTTP Signatures work.
+
+=== Prerequisites
+* Docker installed and the daemon is running on your computer.
+* Internet connection.
+* The quickstart.
+* curl command
+
+== Run the demo Microservice and the TAG
+This demo will give you basic instructions to start the demo. For additional setup details, please check que quick start demo.
+
+=== Start Microservice
+In order to run our demo Microservice we need to open a terminal and execute the following command:
+```
+docker run -e MSG=BLACK -d -p 9090:9090 --name endpoint  tomitribedev/sample-endpoint
+```
+This simple service will return BLACK when we do a GET /color.
+
+=== Start the Tribestream API Gateway (TAG)
+On another terminal execute the following command according to your operating system:
+
+We can reuse the TAG docker container we created from the Tribe quickstart guide. To start TAG execute the following command:
+```
+docker start tag
+```
+If this is the first time you run TAG, open a terminal execute the following command according to your operating system:
+
+For linux:
+```
+docker run --net="host" -de LICENSE=accept --name tag -p 8080:8080 tomitribe/tribestream-api-gateway
+```
+For OsX:
+```
+docker run -de LICENSE=accept --name tag -p 8080:8080  tomitribe/tribestream-api-gateway
+```
+To see the TAG starting process log you can execute the following command:
+```
+docker logs -f tag
+```
+
+=== Open the TAG
+Open a browser and navigate to: http://localhost:8080/tag
+
+Login into the TAG dashboard using the following credentials:
+username:admin, password:admin
+
+image::loginGif.gif[title="TAG login and dashboard"]
+
+=== Provision account and route
+We are going to add a user account and a route to our Microservice for later.
+Please checkout this github project:
+```
+git clone https://github.com/tomitribe/demo-http-signatures.git
+```
+And execute this script for Linux:
+```
+./setup_data_linux.sh
+```
+Or this one for OsX or Windows:
+```
+./setup_data_osx.sh
+```
+The difference relates to how Docker sees the host computer network.
+
+== What are HTTP Signatures?
+* Signs the message content itself
+* Proves identity
+* Prevents message tampering
+* Symmetric or Asymmetric signatures
+* No “secret” ever hits the wire
+* IETF Draft: https://tools.ietf.org/html/draft-cavage-http-signatures
+
+image::signed_message_example.png[title="Signed message example"]
+
+
+On this HTTP request example performed against the TAG, the client application in posting a new color, seen in the message payload at the bottom.
+
+The Authentication header contains the authentication data to be used by the TAG and defines:
+
+* The prefix identifying the authentication scheme… Signatures, Bearer (for OAuth 2.0), Basic.
+* The list of headers that will be signed, for this case, content-length host date (request-target).
+* Algorithm used to create the signature. We will be concatenating the values of the mentioned headers, hashing the result with SHA-256 and signing that hash with the HMAC signing algorithm and a symmetric key secret.
+* The id of the key secret used to create the signature.
+* The signature is the value created by the signing algorithm, using the secret key, over the contents of the mentioned headers.
+
+The TAG will receive the Authentication header, will perform the same signing operation to that HTTP message and will determine if the message was signed with a trusted key or if the message has been tampered with while in transit.
+
+More than proving identity, this authentication scheme also asserts trust over the message's contents.
+
+== Secure your microservice with HTTP Signatures
+
+The mechanism used by the TAG to orchestrate and secure the traffic to and from API endpoints is called Routes (http://localhost:8080/tag/routes). We can also access it through the TAG dashboard.
+
+image::routes_list.png[title="Routes list page"]
+
+=== The HTTP Signatures security profile.
+
+Access to the routes can be restricted by using Security Profiles. We are going to create a new security profile (http://localhost:8080/tag/profiles) and later return to the Routes page.
+
+image::security_profiles_list.png[title="Security profiles list page"]
+
+A default HTTP Signature Auth Profile is already bundled for demo purposes, but we are going to create a new one by clicking on the add HTTP Signature profile menu.
+
+image::security_profiles_menu.png[title="Security profiles menu. Let's add a new HTTP signatures auth profile"]
+
+Once we click on add, a modal view will be presented to set the name and some optional fields like the description and the tags:
+
+image::http_signature_modal.png[title="New HTTP signatures profile modal view"]
+
+After saving, the detail page will be presented:
+
+image::http_signature_detail.png[title="HTTP signatures detail page"]
+
+* The Header defines the authentication header name value that all HTTP requests should use.
+* The Prefix defining the authentication schema string used on this security profile
+* The combination of signing-hashing algorithms allowed for this security profile.
+* The headers used in this authentication scheme.
+
+All headers have a description and a toggle to make them required. When they are required, if the client doesn't send and sign them, the request will fail. If not required, the client doesn't have to send them, but if it uses them, they will be validated.
+
+On that page, if you scroll further down, you will see the date and digest fields. We will described them in later videos of this series.
+
+=== The Route authentication and authorization
+
+Let's go again to the routes list page (http://localhost:8080/tag/routes).
+
+We've already added a route with the provisioning script, the Microservice Route with HTTP Signatures (http://localhost:8080/tag/route-rewrite/microservice-route-with-http-signatures)
+
+This is how it looks out of the box:
+
+image::route_detail.png[title="Route detail page"]
+
+Now, we are going to add the Security profile we created and we are going to add the mandatory permission _admin_, that every user must have in order to invoke the route:
+
+* Add the auth flag to the rule
+* Select the HTTP Signatures auth profile from the dropdown.
+* Add a permissions section
+* Add the _admin_ role.
+
+image::route_http_signatures.gif[title="Add security profile and permissions"]
+
+=== Add a symmetric key to a user
+We'll need to add a key secret to a user account. This secret will be later used to sign the requests and identify the user.
+We'll use an account we added with the provioning script. From the dashboard we can access the accounts list or go direcly by clicking http://localhost:8080/tag/account/eric-cartman
+
+Once in the user detail page, we click on the menu and select _Add Secret Key_.
+
+image::add_secret_key.png[title="Add secret key to the user account"]
+
+A modal view will pop-up with randomly generated values that we can edit. I've added the custom key id: my-new-symmetric-key.
+We must take note of both the Id and Value to later perform the requests
+
+image::secret_key.png[title="Set the Id and copy the value of the new secret key"]
+
+Save it!
+
+== Hands on
+
+=== The browser
+Let's execute the route with a browser (http://localhost:8080/test-http-signatures-auth) and see the 401 error for unauthenticated:
+
+image::401.png[title="401 HTTP error - Unauthorized"]
+
+=== The command line - no authentication
+
+With a regular curl command:
+```
+~$ curl -i http://localhost:8080/test-http-signatures-auth
+
+HTTP/1.1 401 Unauthorized
+X-Proxy-Do-Rewrite: 1558293
+X-Request-ID: 572667cbcff87d72
+Content-Type: application/json;charset=ISO-8859-1
+Content-Language: en
+Content-Length: 54
+Date: Tue, 26 Jun 2018 16:24:01 GMT
+Server: Tomitribe-TAG
+
+{"error":"This request requires HTTP authentication."}
+```
+We need to add authentication to the request. We are going to show 2 ways for doing that. The first one with a bash script, the second one with a test window inside the TAG.
+
+=== The command line - with authentication
+
+We need to go to our demo-http-signatures project and use the sign.sh script in the command line.
+The script takes our secret key id, secret key value (the ones you saved before) and an endpoint to perform a GET request:
+```
+$ ./sign.sh --key my-new-symmetric-key --secret "1de176967faf125884b4883fb19e0bafe51021b09f52cbe7" -X GET http://localhost:8080/test-http-signatures-auth
+....
+> GET /test-http-signatures-auth HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.58.0
+> Accept: */*
+> Authorization:Signature keyId="my-new-symmetric-key",algorithm="hmac-sha256",headers="(request-target) date digest",signature="DldAr+hjxrnO5lTxvh8eVCPV2+yx5ohdXhznlJGhStc="
+> Date:Tue, 26 Jun 2018 17:36:53 WEST
+> Content-Length: 0
+>
+< HTTP/1.1 200 OK
+< X-Proxy-Do-Rewrite: 10482753
+< X-Request-ID: 22cf0e9f8f92bd0c
+< X-Proxy-Received-HTTP-Status: 200
+< X-Proxy-Elapsed: 27276874
+< X-Powered-By: Express
+< ETag: W/"5-qUFKsEwr2rIea20TZiihh+Dfqkw"
+< Content-Type: text/html;charset=utf-8
+< Transfer-Encoding: chunked
+< Date: Tue, 26 Jun 2018 16:36:53 GMT
+< Server: Tomitribe-TAG
+<
+* Connection #0 to host localhost left intact
+BLACK
+```
+
+In here you can see the sent authentication header. If you are curios on how the header is computed, I invite you to check the _sign.sh_ script.
+
+=== Use the TAG test window.
+
+The TAG comes with a test window to perform HTTP requests. Go to the Dashboard, the to routes, open our _Microservice Route_ and click test on the route detail menu.
+
+image::open_test_window.png[title="Click Test to open the routes test window"]
+
+Then we can give a unique name to the test, for later reuse, add the path for our endpoint and add the HTTP signatures authentication from the menu.
+
+image::test_window_1.png[title="The test window"]
+
+There, we need to set the secret key Id and the secret key value from our user, keep the header and prefix defaults and add the Date header as required. Set the _Request Target_ to yes to include _"GET /test-http-signatures-auth"_ in the signature.
+
+image::test_window_2.png[title="The test window - secret key"]
+
+Then click the plus icon in front of Parameters to add an additional header, select Date on the dropdow and click _sign_ on that row. This will send the date header and include it in the signature.
+
+image::test_window_3.png[title="The test window - Add date header"]
+
+Click test and you should get a pretty HTTP 200 and a result payload:
+
+image::test_window_4.png[title="The test window - The response"]
+
+== That's it
+
+Thanks for reading this guide.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
