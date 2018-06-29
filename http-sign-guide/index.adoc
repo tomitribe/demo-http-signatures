@@ -10,7 +10,7 @@
 == Introduction
 
 === Time
-10 minutes
+15 minutes
 
 === Learning objectives
 * Run and secure your first Microservice with HTTP Signatures.
