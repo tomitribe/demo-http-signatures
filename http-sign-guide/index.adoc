@@ -5,7 +5,7 @@
 :sectid:
 :imagesdir: media
 
-= Metrics
+= HTTP Signatures Guide
 
 == Introduction
 
