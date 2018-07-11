@@ -68,6 +68,10 @@ Please checkout this github project:
 ```
 git clone https://github.com/tomitribe/demo-http-signatures.git
 ```
+Change to the _demo-http-signatures_ folder:
+```
+cd demo-http-signatures
+```
 And execute this script for Linux:
 ```
 ./setup_data_linux.sh
