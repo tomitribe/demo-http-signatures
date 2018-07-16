@@ -121,7 +121,9 @@ The difference relates to how Docker sees the host computer network.
 
 == Secure your microservice with HTTP Signatures
 
-The mechanism used by the TAG to orchestrate and secure the traffic to and from API endpoints is called Routes (http://localhost:8080/tag/routes). We can also access it through the TAG dashboard.
+The mechanism used by the TAG to orchestrate and secure the traffic to and from API endpoints is called Routes: http://localhost:8080/tag/routes.
+
+We can also access it through the TAG dashboard:
 
 image::routes_list.png[title="Routes list page"]
 
@@ -157,13 +159,13 @@ image::http_signatures_detail.png[title="HTTP signatures detail page"]
 
 All headers have a description and a toggle to make them required. When they are required, if the client doesn't send and sign them, the request will fail. If not required, the client doesn't have to send them, but if it uses them, they will be validated.
 
-On that page, if you scroll further down, you will see the date and digest fields. We will described them in later videos of this series.
+On that page, if you scroll further down, you will see the date and digest fields. We will describe them in later videos of this series.
 
 === The Route authentication and authorization
 
-Let's go again to the routes list page (http://localhost:8080/tag/routes).
+Let's go again to the routes list page: http://localhost:8080/tag/routes.
 
-We've already added a route with the provisioning script, the Microservice Route with HTTP Signatures (http://localhost:8080/tag/route-rewrite/microservice-route-with-http-signatures)
+We've already added a route with the provisioning script, the Microservice Route with HTTP Signatures: http://localhost:8080/tag/route-rewrite/microservice-route-with-http-signatures
 
 This is how it looks out of the box:
 
@@ -180,7 +182,7 @@ image::secured_route.png[title="Add security profile and permissions"]
 
 === Add a symmetric key to a user
 We'll need to add a key secret to a user account. This secret will be later used to sign the requests and identify the user.
-We'll use an account we added with the provioning script. From the dashboard we can access the accounts list or go direcly by clicking http://localhost:8080/tag/account/alice
+We'll use an account we added with the provioning script. From the dashboard we can access the accounts list or go direcly by clicking: http://localhost:8080/tag/account/alice
 
 Once in the user detail page, we click on the menu and select _Add Secret Key_.
 
@@ -200,7 +202,9 @@ Save it!
 == Hands on
 
 === The browser
-Let's execute the route with a browser (http://localhost:8080/test-http-signatures-auth) and see the 401 error for unauthenticated:
+Let's execute the route with a browser: http://localhost:8080/test-http-signatures-auth
+
+This will get a 401 error for unauthenticated:
 
 image::401.png[title="401 HTTP error - Unauthorized"]
 
@@ -281,10 +285,23 @@ Click test and you should get a pretty HTTP 200 and a result payload:
 
 image::test_window_4.png[title="The test window - The response"]
 
+== Stop all
+
+Since both the TAG and the microservice were created with a specific container name, you can now stop both containers, from the command line execute the following command.
+
+Stopping TAG:
+```
+docker stop tag
+```
+Stopping the microservice:
+```
+docker stop movie-api
+```
+
+
 == That's it
 
 Thanks for reading this guide.
-
 
 
 
