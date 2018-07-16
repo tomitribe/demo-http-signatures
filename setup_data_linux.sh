@@ -10,6 +10,6 @@ curl -v \
  $2
 }
 
-post data/kenny-mccormick.json http://localhost:8080/tag/api/account
-post data/eric-cartman.json http://localhost:8080/tag/api/account
+post data/bob.json http://localhost:8080/tag/api/account
+post data/alice.json http://localhost:8080/tag/api/account
 post data/route_linux.json http://localhost:8080/tag/api/route
