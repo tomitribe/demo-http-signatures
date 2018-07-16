@@ -131,17 +131,11 @@ Access to the routes can be restricted by using Security Profiles. We are going 
 
 image::security_profiles_list.png[title="Security profiles list page"]
 
-A default HTTP Signature Auth Profile is already bundled for demo purposes, but we are going to create a new one by clicking on the add HTTP Signature profile menu.
+A default HTTP Signature Auth Profile is already bundled for demo purposes, we are going to use that one.
 
-image::security_profiles_menu.png[title="Security profiles menu. Let's add a new HTTP signatures auth profile"]
+Let's open it and see the detail page:
 
-Once we click on add, a modal view will be presented to set the name and some optional fields like the description and the tags:
-
-image::http_signature_modal.png[title="New HTTP signatures profile modal view"]
-
-After saving, the detail page will be presented:
-
-image::http_signature_detail.png[title="HTTP signatures detail page"]
+image::http_signatures_detail.png[title="HTTP signatures detail page"]
 
 * The Header defines the authentication header name value that all HTTP requests should use.
 * The Prefix defining the authentication schema string used on this security profile
@@ -165,7 +159,7 @@ image::route_detail.png[title="Route detail page"]
 Now, we are going to add the Security profile we created and we are going to add the mandatory permission _admin_, that every user must have in order to invoke the route:
 
 * Add the auth flag to the rule
-* Select the HTTP Signatures auth profile from the dropdown.
+* Select the HTTP signatures profile from the dropdown.
 * Add a permissions section
 * Add the _admin_ role.
 
