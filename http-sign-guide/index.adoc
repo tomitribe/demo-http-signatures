@@ -22,15 +22,50 @@
 * The quickstart.
 * curl command
 
+== What are HTTP Signatures?
+* Signs the message content itself
+* Proves identity
+* Prevents message tampering
+* Symmetric or Asymmetric signatures
+* No “secret” ever hits the wire
+* IETF Draft: https://tools.ietf.org/html/draft-cavage-http-signatures
+
+image::signed_message_example.png[title="Signed message example"]
+
+
+On this HTTP request example performed against the TAG, the client application in posting a new color, seen in the message payload at the bottom.
+
+The Authentication header contains the authentication data to be used by the TAG and defines:
+
+* The prefix identifying the authentication scheme… Signatures, Bearer (for OAuth 2.0), Basic.
+* The list of headers that will be signed, for this case, content-length host date (request-target).
+* Algorithm used to create the signature. We will be concatenating the values of the mentioned headers, hashing the result with SHA-256 and signing that hash with the HMAC signing algorithm and a symmetric key secret.
+* The id of the key secret used to create the signature.
+* The signature is the value created by the signing algorithm, using the secret key, over the contents of the mentioned headers.
+
+The TAG will receive the Authentication header, will perform the same signing operation to that HTTP message and will determine if the message was signed with a trusted key or if the message has been tampered with while in transit.
+
+More than proving identity, this authentication scheme also asserts trust over the message's contents.
+
+
 == Run the demo Microservice and the TAG
 This demo will give you basic instructions to start the demo. For additional setup details, please check que quick start demo.
 
 === Start Microservice
 In order to run our demo Microservice we need to open a terminal and execute the following command:
+
+If we already have used the movie-api:
 ```
-docker run -e MSG=BLACK -d -p 9090:9090 --name endpoint  tomitribedev/sample-endpoint
+docker start movie-api
 ```
-This simple service will return BLACK when we do a GET /color.
+For the first time:
+```
+docker run -d -p 9090:9090 --name movie-api  tomitribedev/movie-api
+```
+We can validate that our microservice is up and running by executing the following command:
+```
+curl -i http://localhost:9090/movie-api/api/movies
+```
 
 === Start the Tribestream API Gateway (TAG)
 On another terminal execute the following command according to your operating system:
@@ -58,7 +93,9 @@ docker logs -f tag
 Open a browser and navigate to: http://localhost:8080/tag
 
 Login into the TAG dashboard using the following credentials:
-username:admin, password:admin
+
+* username:admin
+* password:admin
 
 image::loginGif.gif[title="TAG login and dashboard"]
 
@@ -81,31 +118,6 @@ Or this one for OsX or Windows:
 ./setup_data_osx.sh
 ```
 The difference relates to how Docker sees the host computer network.
-
-== What are HTTP Signatures?
-* Signs the message content itself
-* Proves identity
-* Prevents message tampering
-* Symmetric or Asymmetric signatures
-* No “secret” ever hits the wire
-* IETF Draft: https://tools.ietf.org/html/draft-cavage-http-signatures
-
-image::signed_message_example.png[title="Signed message example"]
-
-
-On this HTTP request example performed against the TAG, the client application in posting a new color, seen in the message payload at the bottom.
-
-The Authentication header contains the authentication data to be used by the TAG and defines:
-
-* The prefix identifying the authentication scheme… Signatures, Bearer (for OAuth 2.0), Basic.
-* The list of headers that will be signed, for this case, content-length host date (request-target).
-* Algorithm used to create the signature. We will be concatenating the values of the mentioned headers, hashing the result with SHA-256 and signing that hash with the HMAC signing algorithm and a symmetric key secret.
-* The id of the key secret used to create the signature.
-* The signature is the value created by the signing algorithm, using the secret key, over the contents of the mentioned headers.
-
-The TAG will receive the Authentication header, will perform the same signing operation to that HTTP message and will determine if the message was signed with a trusted key or if the message has been tampered with while in transit.
-
-More than proving identity, this authentication scheme also asserts trust over the message's contents.
 
 == Secure your microservice with HTTP Signatures
 
@@ -161,14 +173,18 @@ image::route_http_signatures.gif[title="Add security profile and permissions"]
 
 === Add a symmetric key to a user
 We'll need to add a key secret to a user account. This secret will be later used to sign the requests and identify the user.
-We'll use an account we added with the provioning script. From the dashboard we can access the accounts list or go direcly by clicking http://localhost:8080/tag/account/eric-cartman
+We'll use an account we added with the provioning script. From the dashboard we can access the accounts list or go direcly by clicking http://localhost:8080/tag/account/alice
 
 Once in the user detail page, we click on the menu and select _Add Secret Key_.
 
 image::add_secret_key.png[title="Add secret key to the user account"]
 
-A modal view will pop-up with randomly generated values that we can edit. I've added the custom key id: my-new-symmetric-key.
-We must take note of both the Id and Value to later perform the requests
+A modal view will pop-up with randomly generated values that we can edit. Let's add:
+
+* custom key id: my-new-symmetric-key.
+* custom key value: super-secret-value
+
+We'll use both the Id and Value later, to perform the HTTP requests.
 
 image::secret_key.png[title="Set the Id and copy the value of the new secret key"]
 
@@ -185,8 +201,9 @@ image::401.png[title="401 HTTP error - Unauthorized"]
 
 With a regular curl command:
 ```
-~$ curl -i http://localhost:8080/test-http-signatures-auth
-
+curl -i http://localhost:8080/test-http-signatures-auth
+```
+```
 HTTP/1.1 401 Unauthorized
 X-Proxy-Do-Rewrite: 1558293
 X-Request-ID: 572667cbcff87d72
@@ -205,7 +222,9 @@ We need to add authentication to the request. We are going to show 2 ways for do
 We need to go to our demo-http-signatures project and use the sign.sh script in the command line.
 The script takes our secret key id, secret key value (the ones you saved before) and an endpoint to perform a GET request:
 ```
-$ ./sign.sh --key my-new-symmetric-key --secret "1de176967faf125884b4883fb19e0bafe51021b09f52cbe7" -X GET http://localhost:8080/test-http-signatures-auth
+./sign.sh --key my-new-symmetric-key --secret "super-secret-value" -X GET http://localhost:8080/test-http-signatures-auth
+```
+```
 ....
 > GET /test-http-signatures-auth HTTP/1.1
 > Host: localhost:8080
