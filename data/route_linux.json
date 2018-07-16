@@ -3,7 +3,7 @@
   "profileRequiresAll": true,
   "profiles": [],
   "description": "Route to the demo Microservice using HTTP signatures auth Security Profile. We will be adding the profile and a required user role during the demo.",
-  "modRewrite": "RewriteRule ^/?test-http-signatures-auth$ http://localhost:9090/color/ [P,NE]",
+  "modRewrite": "RewriteRule ^/?test-http-signatures-auth$ http://localhost:9090/movie-api/api/movies/ [P,NE]",
   "roleRequiresAll": true,
   "tags": [],
   "name": "Microservice Route with HTTP Signatures"
