@@ -1,1 +1,1 @@
-{"createdDate":"2017-08-21T08:28:36Z","displayName":"alice","roles":[{"displayName":"Gateway console access","name":"admin","id":"admin"}],"groups":[],"id":"alice","type":"USER","email":"alice@email.com","username":"alice","tags":[]}
+{"createdDate":"2017-08-21T08:28:36Z","displayName":"alice","roles":[{"displayName":"Gateway console access","name":"administrator","id":"administrator"}],"groups":[],"id":"alice","type":"USER","email":"alice@email.com","username":"alice","tags":[]}
