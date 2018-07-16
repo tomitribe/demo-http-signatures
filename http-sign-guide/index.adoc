@@ -51,6 +51,11 @@ More than proving identity, this authentication scheme also asserts trust over t
 == Run the demo Microservice and the TAG
 This demo will give you basic instructions to start the demo. For additional setup details, please check que quick start demo.
 
+We are going to start the Movie microservice, the TAG, use a route to forward the user requests to the Movie and then secure those requests with HTTP Signatures.
+
+image::architecture.png[title="The TAG between the user and the microservice."]
+
+
 === Start Microservice
 In order to run our demo Microservice we need to open a terminal and execute the following command:
 
