@@ -137,10 +137,23 @@ Let's open it and see the detail page:
 
 image::http_signatures_detail.png[title="HTTP signatures detail page"]
 
-* The Header defines the authentication header name value that all HTTP requests should use.
-* The Prefix defining the authentication schema string used on this security profile
-* The combination of signing-hashing algorithms allowed for this security profile.
-* The headers used in this authentication scheme.
+.HTTP Signatures detail page
+|===
+|Attribute |Description
+
+|Header
+|defines the authentication header name value that all HTTP requests should use
+
+|Prefix
+|defines the authentication schema string used on this security profile
+
+|Algorithms
+|Combination of signing-hashing algorithms allowed for this security profile.
+
+|Headers
+|The headers used in this authentication scheme
+|===
+
 
 All headers have a description and a toggle to make them required. When they are required, if the client doesn't send and sign them, the request will fail. If not required, the client doesn't have to send them, but if it uses them, they will be validated.
 
@@ -156,14 +169,14 @@ This is how it looks out of the box:
 
 image::route_detail.png[title="Route detail page"]
 
-Now, we are going to add the Security profile we created and we are going to add the mandatory permission _admin_, that every user must have in order to invoke the route:
+Now, we are going to add the Security profile we created and we are going to add the mandatory permission _administrator_, that every user must have in order to invoke the route:
 
 * Add the auth flag to the rule
 * Select the HTTP signatures profile from the dropdown.
 * Add a permissions section
-* Add the _admin_ role.
+* Add the _administrator_ role.
 
-image::route_http_signatures.gif[title="Add security profile and permissions"]
+image::secured_route.png[title="Add security profile and permissions"]
 
 === Add a symmetric key to a user
 We'll need to add a key secret to a user account. This secret will be later used to sign the requests and identify the user.
